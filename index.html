@@ -2,193 +2,131 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>בובי - גרסה יציבה</title>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>בובי - גרסה פשוטה</title>
     <style>
-        :root { --primary: #6366f1; --success: #22c55e; --error: #ef4444; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Assistant', sans-serif; background: #eef2ff; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; overflow: hidden; }
-        
-        .app-container { background: white; width: 100%; height: 100%; max-width: 500px; display: flex; flex-direction: column; padding: 20px; text-align: center; position: relative; }
-        @media (min-width: 500px) { .app-container { height: 95vh; border-radius: 40px; border: 8px solid #fff; box-shadow: 0 20px 50px rgba(0,0,0,0.1); } }
-
-        .exit-btn { position: absolute; top: 15px; left: 15px; background: #fee2e2; color: #ef4444; border: 2px solid #ef4444; border-radius: 50%; width: 35px; height: 35px; font-weight: bold; cursor: pointer; z-index: 100; display: none; align-items: center; justify-content: center; text-decoration: none; }
-
-        .bot-icon { width: 80px; height: 80px; margin: 0 auto 10px; background: #e0e7ff; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 3px solid var(--primary); }
-        .bubble { background: var(--primary); color: white; border-radius: 20px; padding: 12px; margin-bottom: 15px; font-weight: 700; font-size: 1.1rem; min-height: 70px; display: flex; align-items: center; justify-content: center; position: relative; }
-
-        .sentence { font-size: 1.8rem; font-weight: 800; margin: 25px 0; color: #1e293b; min-height: 3.5rem; }
-        .gap { color: var(--primary); border-bottom: 4px dashed var(--primary); padding: 0 8px; }
-        
-        .correct-ans { color: white !important; background-color: var(--success) !important; border-radius: 10px; padding: 2px 10px; border: none; }
-        .wrong-ans { color: white !important; background-color: var(--error) !important; border-radius: 10px; padding: 2px 10px; border: none; }
-
-        .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 20px; font-size: 1.2rem; font-weight: 800; cursor: pointer; box-shadow: 0 5px 0 #4338ca; width: 100%; margin-bottom: 12px; outline: none; }
-        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #4338ca; }
-        .btn-skip { background: #94a3b8; box-shadow: 0 5px 0 #64748b; }
-        
-        .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .opt-btn { background: white; color: var(--primary); border: 2px solid #e2e8f0; box-shadow: 0 5px 0 #cbd5e1; }
-
-        .progress-bar { width: 100%; height: 8px; background: #e2e8f0; border-radius: 10px; margin-bottom: 15px; display: none; }
-        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: 0.3s; }
-
-        .report-card { text-align: right; background: #f8fafc; padding: 15px; border-radius: 15px; border: 1px solid #e2e8f0; margin-top: 10px; max-height: 200px; overflow-y: auto; }
-        .hidden { display: none !important; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        body { font-family: sans-serif; background: #f0f4f8; text-align: center; margin: 0; padding: 20px; direction: rtl; }
+        .box { background: white; max-width: 400px; margin: auto; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); position: relative; }
+        .hidden { display: none; }
+        .btn { background: #6366f1; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; margin: 10px 0; font-size: 1.2rem; cursor: pointer; }
+        .btn-exit { position: absolute; top: 10px; left: 10px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; z-index: 10; }
+        .bubble { background: #6366f1; color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; font-weight: bold; }
+        .sentence { font-size: 1.5rem; margin: 20px 0; font-weight: bold; }
+        .correct { color: #22c55e; border: 2px solid #22c55e; padding: 2px 10px; border-radius: 10px; }
+        .wrong { color: #ef4444; border: 2px solid #ef4444; padding: 2px 10px; border-radius: 10px; }
+        textarea { width: 100%; height: 60px; border-radius: 10px; border: 1px solid #ccc; padding: 10px; box-sizing: border-box; }
+        .report { text-align: right; background: #eee; padding: 10px; border-radius: 10px; margin-top: 10px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-<div class="app-container" id="main-box">
-    <div id="btn-exit" class="exit-btn" onclick="location.reload()">X</div>
-    <div class="progress-bar" id="p-bar"><div class="progress-fill" id="p-fill"></div></div>
-    
-    <div class="header">
-        <div class="bot-icon">
-            <svg viewBox="0 0 24 24" width="50" height="50" fill="none" stroke="#6366f1" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path></svg>
-        </div>
-        <div class="bubble" id="speech">שלום! אני בובי. בואו נתחיל להתאמן יחד.</div>
+<div class="box">
+    <button id="exit" class="btn-exit hidden" onclick="location.reload()">X</button>
+    <div id="msg" class="bubble">היי! אני בובי. מה נרצה לעשות?</div>
+
+    <div id="s1">
+        <textarea id="inp" placeholder="כתבו כאן לאבחון..."></textarea>
+        <button class="btn" onclick="start('roots')">אבחון ובדיקה 🔍</button>
+        <button class="btn" style="background:#94a3b8" onclick="showMap()">דילוג לבחירת אימון ➔</button>
     </div>
 
-    <div id="screen-diag">
-        <textarea id="diag-input" style="width:100%; height:80px; border-radius:15px; border:2px solid var(--primary); padding:10px; font-family:inherit;" placeholder="הקלידו משפט לאבחון..."></textarea>
-        <button class="btn" onclick="runAnalysis()" style="margin-top:10px">בצע אבחון 🔍</button>
-        <button class="btn btn-skip" onclick="showMap()">דלג על אבחון ➔</button>
+    <div id="s2" class="hidden">
+        <button class="btn" style="background:#16a34a" onclick="prep('roots')">🌲 יער השורשים</button>
+        <button class="btn" style="background:#2563eb" onclick="prep('templates')">🏭 מפעל התבניות</button>
+        <button class="btn" style="background:#7c3aed" onclick="prep('phonetic')">🦇 מערת הצלילים</button>
     </div>
 
-    <div id="screen-map" class="hidden">
-        <button class="btn" style="background:#16a34a; box-shadow:0 5px 0 #15803d" onclick="setZone('roots')">🌲 יער השורשים</button>
-        <button class="btn" style="background:#2563eb; box-shadow:0 5px 0 #1e40af" onclick="setZone('templates')">🏭 מפעל התבניות</button>
-        <button class="btn" style="background:#7c3aed; box-shadow:0 5px 0 #5b21b6" onclick="setZone('phonetic')">🦇 מערת הצלילים</button>
+    <div id="s3" class="hidden">
+        <p>כמה תרגילים?</p>
+        <button class="btn" onclick="play(5)">5 תרגילים</button>
+        <button class="btn" onclick="play(10)">10 תרגילים</button>
+        <button class="btn" onclick="play(50)">הכל!</button>
     </div>
 
-    <div id="screen-amount" class="hidden">
-        <button class="btn opt-btn" onclick="startPlay(5)">5 תרגילים</button>
-        <button class="btn opt-btn" onclick="startPlay(10)">10 תרגילים</button>
-        <button class="btn opt-btn" onclick="startPlay(50)">הכל! 💪</button>
+    <div id="s4" class="hidden">
+        <div id="q-text" class="sentence"></div>
+        <div id="options"></div>
     </div>
 
-    <div id="screen-game" class="hidden">
-        <div class="sentence" id="q-text"></div>
-        <div class="opt-grid" id="opt-grid"></div>
-    </div>
-
-    <div id="screen-report" class="hidden">
-        <h2>כל הכבוד!</h2>
-        <button class="btn btn-skip" onclick="toggleReport()">דוח להורים 📋</button>
-        <div id="parent-report" class="report-card hidden"></div>
-        <button class="btn" style="background:var(--success); margin-top:15px;" onclick="location.reload()">אימון חדש</button>
+    <div id="s5" class="hidden">
+        <h3>כל הכבוד! 🏆</h3>
+        <button class="btn" onclick="document.getElementById('rep').classList.toggle('hidden')">דוח להורים</button>
+        <div id="rep" class="report hidden"></div>
+        <button class="btn" style="background:#22c55e" onclick="location.reload()">אימון חדש</button>
     </div>
 </div>
 
 <script>
-    const questionsBank = {
+    const bank = {
         roots: [
-            { q: "אבא ____ לעבודה", opts: ["הלך", "אלך"], ans: "הלך", hint: "משפחת הליכה מתחילה ב-ה'" },
-            { q: "הילד ____ סיפור", opts: ["כותב", "קוטב"], ans: "כותב", hint: "כתיבה היא באות כ'" },
-            { q: "שלחתי ____ לסבתא", opts: ["מכתב", "מקתב"], ans: "מכתב", hint: "מכתב הוא ב-כ'" },
-            { q: "אנחנו ____ ביומן", opts: ["כותבים", "קוטבים"], ans: "כותבים", hint: "כותבים מתחיל ב-כ'" }
+            {q:"אבא ____ לעבודה", a:"הלך", o:["הלך","אלך"], h:"הלך מתחיל ב-ה'"},
+            {q:"הילד ____ סיפור", a:"כותב", o:["כותב","קוטב"], h:"כותבים ב-כ'"},
+            {q:"היא ____ מהר", a:"הלכה", o:["הלכה","אלכה"], h:"הלכה ב-ה'"}
         ],
         templates: [
-            { q: "אתמול אכל____ תפוח", opts: ["תי", "טי"], ans: "תי", hint: "כשמדברים עלי בעבר - זה תי" },
-            { q: "שיחק____ בחצר", opts: ["תי", "טי"], ans: "תי", hint: "שיחקתי נגמר ב-תי" }
+            {q:"אני אכל____", a:"תי", o:["תי","טי"], h:"אני בעבר זה תי"}
         ],
         phonetic: [
-            { q: "אני __והב שוקולד", opts: ["א", "ע"], ans: "א", hint: "אוהב מתחיל ב-א'" },
-            { q: "ה__לפון מצלצל", opts: ["ט", "ת"], ans: "ט", hint: "טלפון ב-ט'" }
+            {q:"אני ____הב", a:"או", o:["או","עו"], h:"אוהב ב-א'"}
         ]
     };
 
-    let selectedPool = [];
-    let currentIdx = 0;
-    let errors = [];
-
-    function updateSpeech(t) {
-        document.getElementById('speech').innerText = t;
-    }
-
-    function runAnalysis() {
-        const val = document.getElementById('diag-input').value;
-        if(!val) return;
-        let z = 'phonetic';
-        if(val.includes('אלכ') || val.includes('אלך')) z = 'roots';
-        if(val.includes('טי')) z = 'templates';
-        setZone(z);
-    }
+    let pool = [], idx = 0, errs = [];
 
     function showMap() {
-        document.getElementById('screen-diag').classList.add('hidden');
-        document.getElementById('screen-map').classList.remove('hidden');
-        updateSpeech("בחרו נושא לתרגול:");
+        document.getElementById('s1').classList.add('hidden');
+        document.getElementById('s2').classList.remove('hidden');
+        document.getElementById('msg').innerText = "בחרו נושא:";
     }
 
-    function setZone(key) {
-        selectedPool = [...questionsBank[key]].sort(() => Math.random() - 0.5);
-        document.getElementById('screen-diag').classList.add('hidden');
-        document.getElementById('screen-map').classList.add('hidden');
-        document.getElementById('screen-amount').classList.remove('hidden');
-        updateSpeech("כמה תרגילים תרצו?");
+    function start(z) { prep(z); }
+
+    function prep(z) {
+        pool = [...bank[z]].sort(() => Math.random() - 0.5);
+        document.getElementById('s1').classList.add('hidden');
+        document.getElementById('s2').classList.add('hidden');
+        document.getElementById('s3').classList.remove('hidden');
+        document.getElementById('msg').innerText = "כמות תרגילים:";
     }
 
-    function startPlay(num) {
-        selectedPool = selectedPool.slice(0, num);
-        currentIdx = 0; errors = [];
-        document.getElementById('screen-amount').classList.add('hidden');
-        document.getElementById('screen-game').classList.remove('hidden');
-        document.getElementById('btn-exit').style.display = 'flex';
-        document.getElementById('p-bar').style.display = 'block';
-        loadQ();
+    function play(n) {
+        pool = pool.slice(0, n);
+        document.getElementById('s3').classList.add('hidden');
+        document.getElementById('s4').classList.remove('hidden');
+        document.getElementById('exit').classList.remove('hidden');
+        draw();
     }
 
-    function loadQ() {
-        if(currentIdx >= selectedPool.length) return showEnd();
-        const data = selectedPool[currentIdx];
-        document.getElementById('p-fill').style.width = `${(currentIdx / selectedPool.length) * 100}%`;
-        document.getElementById('q-text').innerHTML = data.q.replace("____", `<span class="gap">?</span>`);
-        updateSpeech("מה המילה הנכונה?");
-        
-        const grid = document.getElementById('opt-grid');
-        grid.innerHTML = '';
-        data.opts.forEach(o => {
+    function draw() {
+        if(idx >= pool.length) return end();
+        const d = pool[idx];
+        document.getElementById('q-text').innerHTML = d.q.replace("____", "<span>?</span>");
+        document.getElementById('options').innerHTML = "";
+        d.o.forEach(opt => {
             const b = document.createElement('button');
-            b.className = 'btn opt-btn';
-            b.innerText = o;
+            b.className = "btn"; b.style.background = "white"; b.style.color = "#6366f1"; b.style.border = "2px solid #6366f1";
+            b.innerText = opt;
             b.onclick = () => {
-                if(o === data.ans) {
-                    document.getElementById('q-text').innerHTML = data.q.replace("____", `<span class="gap correct-ans">${o}</span>`);
-                    updateSpeech("מצוין! נכון מאוד.");
-                    setTimeout(() => { currentIdx++; loadQ(); }, 1200);
+                if(opt === d.a) {
+                    document.getElementById('q-text').innerHTML = d.q.replace("____", `<span class="correct">${opt}</span>`);
+                    document.getElementById('msg').innerText = "נכון!";
+                    setTimeout(() => { idx++; draw(); }, 1000);
                 } else {
-                    document.getElementById('q-text').innerHTML = data.q.replace("____", `<span class="gap wrong-ans">${o}</span>`);
-                    updateSpeech(data.hint);
-                    errors.push({q: data.q, wrong: o, right: data.ans});
-                    setTimeout(() => { 
-                        document.getElementById('q-text').innerHTML = data.q.replace("____", `<span class="gap">?</span>`);
-                    }, 1800);
+                    document.getElementById('q-text').innerHTML = d.q.replace("____", `<span class="wrong">${opt}</span>`);
+                    document.getElementById('msg').innerText = d.h;
+                    errs.push(`משפט: ${d.q} | טעות: ${opt}`);
+                    setTimeout(() => { document.getElementById('q-text').innerHTML = d.q.replace("____", "<span>?</span>"); }, 1500);
                 }
             };
-            grid.appendChild(b);
+            document.getElementById('options').appendChild(b);
         });
     }
 
-    function showEnd() {
-        document.getElementById('screen-game').classList.add('hidden');
-        document.getElementById('screen-report').classList.remove('hidden');
-        updateSpeech("סיימנו! כל הכבוד.");
-        let reportDiv = document.getElementById('parent-report');
-        if(errors.length === 0) reportDiv.innerHTML = "מושלם! לא היו טעויות.";
-        else {
-            reportDiv.innerHTML = "<b>טעויות לחיזוק:</b><br>";
-            errors.forEach(e => {
-                reportDiv.innerHTML += `• המילה: ${e.right} (בחר: ${e.wrong})<br>`;
-            });
-        }
-    }
-
-    function toggleReport() {
-        document.getElementById('parent-report').classList.toggle('hidden');
+    function end() {
+        document.getElementById('s4').classList.add('hidden');
+        document.getElementById('s5').classList.remove('hidden');
+        document.getElementById('msg').innerText = "סיימנו!";
+        document.getElementById('rep').innerHTML = errs.length ? errs.join("<br>") : "אין טעויות!";
     }
 </script>
 </body>
