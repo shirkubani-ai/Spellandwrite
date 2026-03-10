@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>המסע של בובי - לימוד כתיב</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --forest: #2d6a4f; --factory: #4361ee; --cave: #7209b7; --success: #22c55e; }
+        
+        body { 
+            font-family: 'Assistant', sans-serif; background: #eef2ff; 
+            margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px;
+        }
+
+        .app-container { 
+            background: white; width: 95%; max-width: 480px; border-radius: 35px; 
+            padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            text-align: center; border: 8px solid #f8fafc; position: relative; margin-top: 50px;
+        }
+
+        /* דמות קריקטורה שיוצאת מהמסגרת */
+        .char-img {
+            width: 140px; height: 140px; margin: -100px auto 10px;
+            background: white; border-radius: 50%; border: 5px solid #4f46e5;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .char-img img { width: 100%; height: 100%; object-fit: cover; }
+
+        .bubble { 
+            background: #4f46e5; color: white; border-radius: 20px; 
+            padding: 15px; margin-bottom: 25px; font-weight: 700; font-size: 1.1rem;
+            position: relative; line-height: 1.4; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+        .bubble::after {
+            content: ''; position: absolute; top: -10px; left: 50%;
+            border-left: 10px solid transparent; border-right: 10px solid transparent;
+            border-bottom: 10px solid #4f46e5; transform: translateX(-50%);
+        }
+
+        /* עיצוב אזורים */
+        .zone-box {
+            border-radius: 25px; padding: 20px; margin-bottom: 12px; color: white;
+            cursor: pointer; transition: 0.3s; border-bottom: 6px solid rgba(0,0,0,0.3);
+            font-weight: 800; font-size: 1.3rem;
+        }
+        .zone-box:hover { transform: translateY(-3px); filter: brightness(1.1); }
+        .zone-forest { background: #22c55e; }
+        .zone-factory { background: #3b82f6; }
+        .zone-cave { background: #8b5cf6; }
+
+        textarea { 
+            width: 100%; height: 100px; border: 3px solid #e2e8f0; border-radius: 15px; 
+            padding: 15px; font-size: 1.1rem; font-family: inherit; margin-bottom: 15px; 
+            box-sizing: border-box; outline: none; border: 3px solid #4f46e5;
+        }
+
+        .opt-btn { 
+            background: white; border: 3px solid #e2e8f0; padding: 15px; border-radius: 20px; 
+            font-size: 1.4rem; font-weight: 800; cursor: pointer; box-shadow: 0 5px 0 #cbd5e1; 
+            width: 100%; margin-bottom: 12px; transition: 0.1s;
+        }
+        .opt-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #cbd5e1; }
+
+        .sentence { font-size: 1.8rem; font-weight: 800; margin: 25px 0; color: #1e293b; }
+        .gap { color: #4f46e5; border-bottom: 4px dashed #4f46e5; padding: 0 5px; }
+        
+        .report-box { text-align: right; background: #f8fafc; padding: 20px; border-radius: 20px; border: 1px solid #ddd; margin-top: 10px; }
+        .report-item { margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #eee; }
+
+        .hidden { display: none; }
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="game-box">
+    <div class="char-img">
+        <img id="boobi-img" src="https://img.freepik.com/free-vector/cute-robot-waving-hand-cartoon-character_1308-123471.jpg" alt="בובי">
+    </div>
+    
+    <div class="bubble" id="speech">היי! אני בובי. כתבו לי משפט קצר (למשל: "אני הלכתי לאכול") כדי שנתחיל באבחון!</div>
+
+    <div id="screen-diag">
+        <textarea id="diag-input" placeholder="הקלידו כאן..."></textarea>
+        <button class="opt-btn" style="background:#4f46e5; color:white; box-shadow:0 5px 0 #3730a3;" onclick="runAnalysis()">בנה לי אימון אישי! 🚀</button>
+        <p style="cursor:pointer; color:#64748b; margin-top:10px; font-size:0.9rem;" onclick="showMap()">או: בחר אזור בעצמך</p>
+    </div>
+
+    <div id="screen-map" class="hidden">
+        <div class="zone-box zone-forest" onclick="startZone('roots')">🌳 יער השורשים (ה.ל.כ/כ.ת.ב)</div>
+        <div class="zone-box zone-factory" onclick="startZone('templates')">🏭 מפעל התבניות (תי/טי)</div>
+        <div class="zone-box zone-cave" onclick="startZone('phonetic')">Bat מערת הצלילים (א-ע/ט-ת)</div>
+    </div>
+
+    <div id="screen-game" class="hidden">
+        <div class="sentence" id="q-text"></div>
+        <div id="opt-grid"></div>
+        <p onclick="location.reload()" style="cursor:pointer; color:gray; margin-top:20px; font-size:0.9rem;">🏠 חזרה להתחלה</p>
+    </div>
+
+    <div id="screen-report" class="hidden">
+        <h2 style="color:#4f46e5;">דוח התקדמות להורים 📋</h2>
+        <div class="report-box" id="report-content"></div>
+        <button class="opt-btn" style="margin-top:20px; background:var(--success); color:white; box-shadow:0 5px 0 #15803d;" onclick="location.reload()">אימון חדש ➔</button>
+    </div>
+</div>
+
+<script>
+    // בנק שאלות מורחב לפי הקובץ
+    const questionsBank = {
+        roots: [
+            { q: "אבא ____ לעבודה", opts: ["הלך", "אלך"], ans: "הלך", type: "אורתוגרפית (שורש ה.ל.כ)" },
+            { q: "הילד ____ סיפור", opts: ["כותב", "קוטב"], ans: "כותב", type: "אורתוגרפית (שורש כ.ת.ב)" },
+            { q: "ביום חמישי יצאתי ל____", opts: ["הליכה", "אליכה"], ans: "הליכה", type: "אורתוגרפית (שורש ה.ל.כ)" },
+            { q: "קיבלתי ____ חדש", opts: ["מכתב", "מקתב"], ans: "מכתב", type: "אורתוגרפית (שורש כ.ת.ב)" },
+            { q: "אנחנו ____ ביחד", opts: ["הולכים", "אולכים"], ans: "הולכים", type: "אורתוגרפית (שורש ה.ל.כ)" }
+        ],
+        templates: [
+            { q: "אתמול שיחק____ בחצר", opts: ["תי", "טי"], ans: "תי", type: "אורתוגרפית (תבנית עבר)" },
+            { q: "אני אכל____ בננה", opts: ["תי", "טי"], ans: "תי", type: "אורתוגרפית (תבנית עבר)" },
+            { q: "ראי____ קשת בענן", opts: ["תי", "טי"], ans: "תי", type: "אורתוגרפית (תבנית עבר)" },
+            { q: "קפצ____ גבוה", opts: ["תי", "טי"], ans: "תי", type: "אורתוגרפית (תבנית עבר)" },
+            { q: "הלכ____ לישון", opts: ["תי", "טי"], ans: "תי", type: "אורתוגרפית (תבנית עבר)" }
+        ],
+        phonetic: [
+            { q: "אני __והב שוקולד", opts: ["א", "ע"], ans: "א", type: "פונטית (א/ע)" },
+            { q: "ה__לפון מצלצל", opts: ["ט", "ת"], ans: "ט", type: "פונטית (ט/ת)" },
+            { q: "באתי __ם אמא", opts: ["ע", "א"], ans: "ע", type: "פונטית (א/ע)" },
+            { q: "יש לי __לב חמוד", opts: ["כ", "ק"], ans: "כ", type: "פונטית (כ/ק)" },
+            { q: "קניתי __יק חדש", opts: ["ת", "ט"], ans: "ת", type: "פונטית (ט/ת)" }
+        ]
+    };
+
+    let sessionQs = [];
+    let currentIdx = 0;
+    let errors = {};
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSfx(win) {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(win ? 550 : 150, audioCtx.currentTime);
+        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+    }
+
+    function runAnalysis() {
+        const input = document.getElementById('diag-input').value;
+        if(!input) return alert("כתבו משהו שבובי יוכל לנתח!");
+        
+        let targetZone = 'phonetic'; 
+        if(input.includes('אלכ') || input.includes('אלך') || input.includes('מקתב')) targetZone = 'roots';
+        else if(input.includes('טי') && input.length > 3) targetZone = 'templates';
+        
+        document.getElementById('speech').innerText = "זיהיתי למה אתם זקוקים! בואו נתאמן על זה...";
+        setTimeout(() => startZone(targetZone), 1200);
+    }
+
+    function showMap() {
+        document.getElementById('screen-diag').classList.add('hidden');
+        document.getElementById('screen-map').classList.remove('hidden');
+        document.getElementById('speech').innerText = "בחרו אזור שבו תרצו להתאמן:";
+    }
+
+    function startZone(key) {
+        sessionQs = [...questionsBank[key]].sort(() => Math.random() - 0.5);
+        currentIdx = 0;
+        document.getElementById('screen-diag').classList.add('hidden');
+        document.getElementById('screen-map').classList.add('hidden');
+        document.getElementById('screen-game').classList.remove('hidden');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if(currentIdx >= sessionQs.length) return showReport();
+        const data = sessionQs[currentIdx];
+        document.getElementById('q-text').innerHTML = data.q.replace("____", "<span class='gap'>?</span>");
+        const grid = document.getElementById('opt-grid');
+        grid.innerHTML = '';
+        data.opts.forEach(o => {
+            const b = document.createElement('button');
+            b.className = 'opt-btn'; b.innerText = o;
+            b.onclick = () => {
+                if(o === data.ans) {
+                    playSfx(true);
+                    document.getElementById('boobi-img').src = "https://img.freepik.com/free-vector/hand-drawn-laughing-robot-illustration_23-2150529457.jpg"; 
+                    currentIdx++;
+                    setTimeout(() => { 
+                        document.getElementById('boobi-img').src = "https://img.freepik.com/free-vector/cute-robot-waving-hand-cartoon-character_1308-123471.jpg";
+                        loadQuestion(); 
+                    }, 800);
+                } else {
+                    playSfx(false);
+                    document.getElementById('boobi-img').src = "https://img.freepik.com/free-vector/funny-robot-cartoon-character_1308-132955.jpg";
+                    document.getElementById('game-box').classList.add('shake');
+                    errors[data.type] = (errors[data.type] || 0) + 1;
+                    setTimeout(() => document.getElementById('game-box').classList.remove('shake'), 400);
+                }
+            };
+            grid.appendChild(b);
+        });
+    }
+
+    function showReport() {
+        document.getElementById('screen-game').classList.add('hidden');
+        document.getElementById('screen-report').classList.remove('hidden');
+        document.getElementById('boobi-img').src = "https://img.freepik.com/free-vector/cute-robot-holding-golden-cup-cartoon-vector-icon-illustration-science-technology-icon-concept_138676-4553.jpg";
+        const content = document.getElementById('report-content');
+        if(!Object.keys(errors).length) {
+            content.innerHTML = "🏆 <b>מושלם!</b> הילד שלט בכל המילים ללא טעויות.";
+        } else {
+            content.innerHTML = "<h4>סיכום פדגוגי לחיזוק:</h4>";
+            for(let t in errors) content.innerHTML += `<div class='report-item'>📍 <b>${t}:</b> הופיעו ${errors[t]} טעויות.</div>`;
+            content.innerHTML += "<p style='font-size:0.85rem; color:gray;'>* מומלץ לחזור על אימון השורשים לביסוס הזיכרון החזותי.</p>";
+        }
+    }
+</script>
+</body>
+</html>
