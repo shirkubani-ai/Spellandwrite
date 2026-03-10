@@ -3,27 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>בובי - הגרסה המלאה (50 שלבים)</title>
+    <title>בובי - חבר לכתיבה (הגרסה עם הדמות)</title>
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; background: #EEF2FF; direction: rtl; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
         .card { background: white; width: 95%; max-width: 450px; padding: 25px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; position: relative; max-height: 90vh; overflow-y: auto; }
         .hidden { display: none !important; }
-        .bot-head { background: #6366F1; color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; font-weight: bold; font-size: 1.1rem; }
+        
+        /* אזור הדמות והבועה */
+        .bot-area { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+        .bot-visual { width: 100px; height: 100px; transition: transform 0.3s ease; margin-bottom: 10px; }
+        .bot-visual svg { width: 100%; height: 100%; }
+        
+        /* בועת דיבור משופרת */
+        .bot-head { background: #6366F1; color: white; padding: 15px; border-radius: 20px; font-weight: bold; font-size: 1.1rem; position: relative; width: 100%; box-sizing: border-box; }
+        .bot-head::before { content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border-width: 10px; border-style: solid; border-color: transparent transparent #6366F1 transparent; }
+
         .btn { background: #6366F1; color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; margin: 8px 0; font-size: 1.1rem; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn:active { transform: scale(0.98); opacity: 0.9; }
-        .btn-exit { position: absolute; top: 10px; left: 10px; background: #EF4444; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-weight: bold; z-index: 10; }
+        .btn-exit { position: absolute; top: 10px; left: 10px; background: #EF4444; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-weight: bold; z-index: 10; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+        
         .sentence { font-size: 1.7rem; margin: 25px 0; min-height: 60px; color: #1E293B; line-height: 1.4; }
+        .gap { color: var(--primary); border-bottom: 4px dashed var(--primary); padding: 0 8px; transition: 0.2s; }
+        
+        /* צבעים לתשובות */
+        .correct-ans { color: white !important; background-color: #22C55E !important; border: none !important; border-radius: 10px; padding: 2px 10px; }
+        .wrong-ans { color: white !important; background-color: #EF4444 !important; border: none !important; border-radius: 10px; padding: 2px 10px; }
+
         .correct { color: #22C55E; font-weight: 800; border: 3px solid #22C55E; padding: 2px 10px; border-radius: 10px; }
         .wrong { color: #EF4444; font-weight: 800; border: 3px solid #EF4444; padding: 2px 10px; border-radius: 10px; }
+        
         textarea { width: 100%; height: 80px; border: 2px solid #DDD; border-radius: 12px; padding: 12px; margin-bottom: 10px; resize: none; font-size: 1rem; }
         .parent-log { text-align: right; background: #F1F5F9; padding: 15px; border-radius: 12px; margin-top: 15px; font-size: 0.9rem; border: 1px solid #CBD5E1; }
+        
+        /* אנימציית קפיצה */
+        @keyframes jump { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        .bot-jump { animation: jump 0.5s ease; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <button id="x-btn" class="hidden btn-exit" onclick="location.reload()">X</button>
-    <div id="bot-msg" class="bot-head">היי! אני בובי. בואו נתחיל להתאמן.</div>
+    
+    <div class="bot-area">
+        <div class="bot-visual" id="bot-visual">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="25" y="40" width="50" height="50" rx="10" fill="#6366F1"/>
+                <circle cx="50" cy="20" r="10" fill="#CBD5E1"/>
+                <rect x="45" y="25" width="10" height="15" fill="#CBD5E1"/>
+                <circle cx="40" cy="55" r="5" fill="white"/>
+                <circle cx="60" cy="55" r="5" fill="white"/>
+                <circle cx="40" cy="55" r="2.5" fill="black"/>
+                <circle cx="60" cy="55" r="2.5" fill="black"/>
+                <rect x="35" y="70" width="30" height="5" rx="2.5" fill="white"/>
+                <rect x="20" y="55" width="5" height="20" rx="2.5" fill="#CBD5E1"/>
+                <rect x="75" y="55" width="5" height="20" rx="2.5" fill="#CBD5E1"/>
+            </svg>
+        </div>
+        <div id="bot-msg" class="bot-head">שלום! אני בובי, החבר החדש שלכם לכתיבה. מה נלמד היום?</div>
+    </div>
 
     <div id="step1">
         <textarea id="diag-box" placeholder="כתבו כאן משפט (למשל: אני אלך לאכול)"></textarea>
@@ -58,6 +96,7 @@
 </div>
 
 <script>
+    // בנק השאלות המלא (50 משפטים)
     const bank = {
         roots: [
             {q: "אבא ____ לעבודה", a: "הלך", opts: ["הלך", "אלך"], h: "משפחת הליכה מתחילה ב-ה'"},
@@ -118,11 +157,19 @@
     };
 
     let activePool = [], curIdx = 0, errors = [];
+    const botVisual = document.getElementById('bot-visual');
+
+    // פונקציית אנימציית קפיצה
+    function botJump() {
+        botVisual.classList.add('bot-jump');
+        setTimeout(() => botVisual.classList.remove('bot-jump'), 500);
+    }
 
     function goToTopics() {
         document.getElementById('step1').classList.add('hidden');
         document.getElementById('step2').classList.remove('hidden');
         document.getElementById('bot-msg').innerText = "בחרו נושא לתרגול:";
+        botJump();
     }
 
     function startByDiag() {
@@ -139,7 +186,8 @@
         document.getElementById('step1').classList.add('hidden');
         document.getElementById('step2').classList.add('hidden');
         document.getElementById('step3').classList.remove('hidden');
-        document.getElementById('bot-msg').innerText = "כמעט מוכנים...";
+        document.getElementById('bot-msg').innerText = "כמה שאלות נעשה הפעם?";
+        botJump();
     }
 
     function setLength(n) {
@@ -153,7 +201,7 @@
     function renderQ() {
         if(curIdx >= activePool.length) return showResults();
         let item = activePool[curIdx];
-        document.getElementById('bot-msg').innerText = "איזו מילה מתאימה?";
+        document.getElementById('bot-msg').innerText = "בחרו את המילה הנכונה:";
         document.getElementById('q-text').innerHTML = item.q.replace("____", "____");
         
         let optArea = document.getElementById('options-area');
@@ -170,21 +218,30 @@
 
     function check(userAns, item) {
         if(userAns === item.a) {
-            document.getElementById('q-text').innerHTML = item.q.replace("____", `<span class="correct">${userAns}</span>`);
-            document.getElementById('bot-msg').innerText = "מעולה! נכון מאוד.";
+            document.getElementById('q-text').innerHTML = item.q.replace("____", `<span class="correct-ans">${userAns}</span>`);
+            document.getElementById('bot-msg').innerText = "מעולה! נכון מאוד. 🌟";
+            botJump(); // קפיצת שמחה
             setTimeout(() => { curIdx++; renderQ(); }, 1200);
         } else {
-            document.getElementById('q-text').innerHTML = item.q.replace("____", `<span class="wrong">${userAns}</span>`);
+            document.getElementById('q-text').innerHTML = item.q.replace("____", `<span class="wrong-ans">${userAns}</span>`);
             document.getElementById('bot-msg').innerText = item.h;
-            errors.push(`המשפט: ${item.q.replace('____','___')} | הילד בחר: ${userAns} | נכון: ${item.a}`);
+            errors.push(`המשפט: ${item.q.replace('____','___')} | בחר: ${userAns} | נכון: ${item.a}`);
         }
     }
 
     function showResults() {
         document.getElementById('step4').classList.add('hidden');
         document.getElementById('step5').classList.remove('hidden');
-        document.getElementById('bot-msg').innerText = "איזה יופי, סיימנו!";
-        document.getElementById('log').innerHTML = errors.length ? errors.join("<br><br>") : "מושלם! אפס טעויות. אתם אלופים!";
+        document.getElementById('bot-msg').innerText = "כל הכבוד, סיימנו!";
+        botJump();
+        let reportDiv = document.getElementById('log');
+        if(errors.length === 0) reportDiv.innerHTML = "🏆 מושלם! אפס טעויות. אתם אלופים!";
+        else {
+            reportDiv.innerHTML = "<b>טעויות לחיזוק:</b><br><br>";
+            errors.forEach(e => {
+                reportDiv.innerHTML += `• ${e}<br>`;
+            });
+        }
     }
 </script>
 
