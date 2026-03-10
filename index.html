@@ -3,131 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>בובי - גרסה פשוטה</title>
+    <title>בובי - הגרסה המלאה (50 שלבים)</title>
     <style>
-        body { font-family: sans-serif; background: #f0f4f8; text-align: center; margin: 0; padding: 20px; direction: rtl; }
-        .box { background: white; max-width: 400px; margin: auto; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); position: relative; }
-        .hidden { display: none; }
-        .btn { background: #6366f1; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; margin: 10px 0; font-size: 1.2rem; cursor: pointer; }
-        .btn-exit { position: absolute; top: 10px; left: 10px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; z-index: 10; }
-        .bubble { background: #6366f1; color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; font-weight: bold; }
-        .sentence { font-size: 1.5rem; margin: 20px 0; font-weight: bold; }
-        .correct { color: #22c55e; border: 2px solid #22c55e; padding: 2px 10px; border-radius: 10px; }
-        .wrong { color: #ef4444; border: 2px solid #ef4444; padding: 2px 10px; border-radius: 10px; }
-        textarea { width: 100%; height: 60px; border-radius: 10px; border: 1px solid #ccc; padding: 10px; box-sizing: border-box; }
-        .report { text-align: right; background: #eee; padding: 10px; border-radius: 10px; margin-top: 10px; font-size: 0.9rem; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #EEF2FF; direction: rtl; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .card { background: white; width: 95%; max-width: 450px; padding: 25px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; position: relative; max-height: 90vh; overflow-y: auto; }
+        .hidden { display: none !important; }
+        .bot-head { background: #6366F1; color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; font-weight: bold; font-size: 1.1rem; }
+        .btn { background: #6366F1; color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; margin: 8px 0; font-size: 1.1rem; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-exit { position: absolute; top: 10px; left: 10px; background: #EF4444; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-weight: bold; z-index: 10; }
+        .sentence { font-size: 1.7rem; margin: 25px 0; min-height: 60px; color: #1E293B; line-height: 1.4; }
+        .correct { color: #22C55E; font-weight: 800; border: 3px solid #22C55E; padding: 2px 10px; border-radius: 10px; }
+        .wrong { color: #EF4444; font-weight: 800; border: 3px solid #EF4444; padding: 2px 10px; border-radius: 10px; }
+        textarea { width: 100%; height: 80px; border: 2px solid #DDD; border-radius: 12px; padding: 12px; margin-bottom: 10px; resize: none; font-size: 1rem; }
+        .parent-log { text-align: right; background: #F1F5F9; padding: 15px; border-radius: 12px; margin-top: 15px; font-size: 0.9rem; border: 1px solid #CBD5E1; }
     </style>
 </head>
 <body>
 
-<div class="box">
-    <button id="exit" class="btn-exit hidden" onclick="location.reload()">X</button>
-    <div id="msg" class="bubble">היי! אני בובי. מה נרצה לעשות?</div>
+<div class="card">
+    <button id="x-btn" class="hidden btn-exit" onclick="location.reload()">X</button>
+    <div id="bot-msg" class="bot-head">היי! אני בובי. בואו נתחיל להתאמן.</div>
 
-    <div id="s1">
-        <textarea id="inp" placeholder="כתבו כאן לאבחון..."></textarea>
-        <button class="btn" onclick="start('roots')">אבחון ובדיקה 🔍</button>
-        <button class="btn" style="background:#94a3b8" onclick="showMap()">דילוג לבחירת אימון ➔</button>
+    <div id="step1">
+        <textarea id="diag-box" placeholder="כתבו כאן משפט (למשל: אני אלך לאכול)"></textarea>
+        <button class="btn" onclick="startByDiag()">אבחון כתיבה 🔍</button>
+        <button class="btn" style="background:#64748B" onclick="goToTopics()">בחירת תרגול ידנית ➔</button>
     </div>
 
-    <div id="s2" class="hidden">
-        <button class="btn" style="background:#16a34a" onclick="prep('roots')">🌲 יער השורשים</button>
-        <button class="btn" style="background:#2563eb" onclick="prep('templates')">🏭 מפעל התבניות</button>
-        <button class="btn" style="background:#7c3aed" onclick="prep('phonetic')">🦇 מערת הצלילים</button>
+    <div id="step2" class="hidden">
+        <button class="btn" style="background:#16A34A" onclick="pickTopic('roots')">🌲 יער השורשים (ה/א, כ/ק)</button>
+        <button class="btn" style="background:#2563EB" onclick="pickTopic('templates')">🏭 מפעל התבניות (תי/טי)</button>
+        <button class="btn" style="background:#7C3AED" onclick="pickTopic('phonetic')">🦇 מערת הצלילים (א/ע, ט/ת)</button>
     </div>
 
-    <div id="s3" class="hidden">
-        <p>כמה תרגילים?</p>
-        <button class="btn" onclick="play(5)">5 תרגילים</button>
-        <button class="btn" onclick="play(10)">10 תרגילים</button>
-        <button class="btn" onclick="play(50)">הכל!</button>
+    <div id="step3" class="hidden">
+        <p>כמה שאלות תרצו?</p>
+        <button class="btn" onclick="setLength(5)">5 שאלות</button>
+        <button class="btn" onclick="setLength(10)">10 שאלות</button>
+        <button class="btn" onclick="setLength(99)">הכל! 💪</button>
     </div>
 
-    <div id="s4" class="hidden">
+    <div id="step4" class="hidden">
         <div id="q-text" class="sentence"></div>
-        <div id="options"></div>
+        <div id="options-area"></div>
     </div>
 
-    <div id="s5" class="hidden">
-        <h3>כל הכבוד! 🏆</h3>
-        <button class="btn" onclick="document.getElementById('rep').classList.toggle('hidden')">דוח להורים</button>
-        <div id="rep" class="report hidden"></div>
-        <button class="btn" style="background:#22c55e" onclick="location.reload()">אימון חדש</button>
+    <div id="step5" class="hidden">
+        <h2>סיימנו! 🏆</h2>
+        <button class="btn" style="background:#64748B" onclick="document.getElementById('log').classList.toggle('hidden')">דוח להורים 📋</button>
+        <div id="log" class="parent-log hidden"></div>
+        <button class="btn" style="background:#22C55E" onclick="location.reload()">אימון חדש</button>
     </div>
 </div>
 
 <script>
     const bank = {
         roots: [
-            {q:"אבא ____ לעבודה", a:"הלך", o:["הלך","אלך"], h:"הלך מתחיל ב-ה'"},
-            {q:"הילד ____ סיפור", a:"כותב", o:["כותב","קוטב"], h:"כותבים ב-כ'"},
-            {q:"היא ____ מהר", a:"הלכה", o:["הלכה","אלכה"], h:"הלכה ב-ה'"}
+            {q: "אבא ____ לעבודה", a: "הלך", opts: ["הלך", "אלך"], h: "משפחת הליכה מתחילה ב-ה'"},
+            {q: "הילד ____ סיפור", a: "כותב", opts: ["כותב", "קוטב"], h: "כתיבה היא באות כ'"},
+            {q: "אנחנו ____ לים", a: "הולכים", opts: ["הולכים", "אולכים"], h: "הולכים מתחיל ב-ה'"},
+            {q: "שלחתי ____ לסבתא", a: "מכתב", opts: ["מכתב", "מקתב"], h: "מכתב הוא ב-כ'"},
+            {q: "היא ____ מהר", a: "הלכה", opts: ["הלכה", "אלכה"], h: "הלכה מתחילה ב-ה'"},
+            {q: "הסופר ____ ספר", a: "כתב", opts: ["כתב", "קתב"], h: "כתב הוא ב-כ'"},
+            {q: "יצאנו ל____ בערב", a: "הליכה", opts: ["הליכה", "אליכה"], h: "הליכה כותבים ב-ה'"},
+            {q: "הם ____ לביקור", a: "הלכו", opts: ["הלכו", "אלכו"], h: "הלכו ב-ה'"},
+            {q: "אל ת____ לשם", a: "תלך", opts: ["תלך", "תלכ"], h: "בסוף תלך יש כ' סופית"},
+            {q: "יש לי ____ יפה", a: "כתב", opts: ["כתב", "קתב"], h: "כתב יד ב-כ'"},
+            {q: "אנחנו ____ ביומן", a: "כותבים", opts: ["כותבים", "קוטבים"], h: "כותבים ב-כ'"},
+            {q: "הילד ____ לאיבוד", a: "הלך", opts: ["הלך", "אלך"], h: "הלך ב-ה'"},
+            {q: "קיבלתי ____ חדש", a: "מכתב", opts: ["מכתב", "מקתב"], h: "מכתב ב-כ'"},
+            {q: "היא ____ הודעה", a: "כותבת", opts: ["כותבת", "קוטבת"], h: "כותבת ב-כ'"},
+            {q: "ה____ על הלוח", a: "כתובת", opts: ["כתובת", "קתובת"], h: "כתובת ב-כ'"},
+            {q: "הם ____ במחברת", a: "כותבים", opts: ["כותבים", "קוטבים"], h: "כותבים ב-כ'"}
         ],
         templates: [
-            {q:"אני אכל____", a:"תי", o:["תי","טי"], h:"אני בעבר זה תי"}
+            {q: "אתמול אכל____ תפוח", a: "תי", opts: ["תי", "טי"], h: "אני בעבר זה תי"},
+            {q: "שיחק____ בחצר", a: "תי", opts: ["תי", "טי"], h: "שיחקתי ב-תי"},
+            {q: "רצ____ מהר מאוד", a: "תי", opts: ["תי", "טי"], h: "רצתי ב-תי"},
+            {q: "קפצ____ לשלולית", a: "תי", opts: ["תי", "טי"], h: "קפצתי ב-תי"},
+            {q: "ראי____ סרט מצחיק", a: "תי", opts: ["תי", "טי"], h: "ראיתי ב-תי"},
+            {q: "בני____ מגדל", a: "תי", opts: ["תי", "טי"], h: "בניתי ב-תי"},
+            {q: "שמע____ שיר", a: "תי", opts: ["תי", "טי"], h: "שמעתי ב-תי"},
+            {q: "קני____ גלידה", a: "תי", opts: ["תי", "טי"], h: "קניתי ב-תי"},
+            {q: "צייר____ ציור", a: "תי", opts: ["תי", "טי"], h: "ציירתי ב-תי"},
+            {q: "ישנ____ מצוין", a: "תי", opts: ["תי", "טי"], h: "ישנתי ב-תי"},
+            {q: "שתי____ מים", a: "תי", opts: ["תי", "טי"], h: "שתיתי ב-תי"},
+            {q: "מצא____ מטבע", a: "תי", opts: ["תי", "טי"], h: "מצאתי ב-תי"},
+            {q: "עלי____ על העץ", a: "תי", opts: ["תי", "טי"], h: "עליתי ב-תי"},
+            {q: "הלכ____ לישון", a: "תי", opts: ["תי", "טי"], h: "הלכתי ב-תי"},
+            {q: "סגר____ את הדלת", a: "תי", opts: ["תי", "טי"], h: "סגרתי ב-תי"},
+            {q: "לבש____ חולצה", a: "תי", opts: ["תי", "טי"], h: "לבשתי ב-תי"}
         ],
         phonetic: [
-            {q:"אני ____הב", a:"או", o:["או","עו"], h:"אוהב ב-א'"}
+            {q: "אני ____הב שוקולד", a: "או", opts: ["או", "עו"], h: "אוהב ב-א'"},
+            {q: "באתי ____ם אמא", a: "עם", opts: ["עם", "אם"], h: "עם חברים ב-ע'"},
+            {q: "ה____לפון מצלצל", a: "ט", opts: ["ט", "ת"], h: "טלפון ב-ט'"},
+            {q: "קניתי ____יק חדש", a: "ת", opts: ["ת", "ט"], h: "תיק ב-ת'"},
+            {q: "יש לי ____לב חמוד", a: "כ", opts: ["כ", "ק"], h: "כלב ב-כ'"},
+            {q: "השמש ____ולה בבוקר", a: "ע", opts: ["ע", "א"], h: "לעלות זה ב-ע'"},
+            {q: "אני ____וכל עכשיו", a: "או", opts: ["או", "עו"], h: "לאכול ב-א'"},
+            {q: "יש ____נן בשמיים", a: "ע", opts: ["ע", "א"], h: "ענן ב-ע'"},
+            {q: "ה____פוח אדום", a: "ת", opts: ["ת", "ט"], h: "תפוח ב-ת'"},
+            {q: "השוקולד מת____ק", a: "וק", opts: ["וק", "וכ"], h: "מתוק ב-ק'"},
+            {q: "ה____ור צהוב", a: "א", opts: ["א", "ע"], h: "אור ב-א'"},
+            {q: "ה____וגה טעימה", a: "ע", opts: ["ע", "א"], h: "עוגה ב-ע'"},
+            {q: "ה____ול צהוב בים", a: "ח", opts: ["ח", "כ"], h: "חול ב-ח'"},
+            {q: "יש לי ____יק כבד", a: "ת", opts: ["ת", "ט"], h: "תיק ב-ת'"},
+            {q: "ה____רח פורח", a: "פ", opts: ["פ", "כ"], h: "פרח ב-פ'"},
+            {q: "אני ____וצה לשחק", a: "ר", opts: ["ר", "ע"], h: "רוצה ב-ר'"},
+            {q: "ה____רנגול קורא", a: "ת", opts: ["ת", "ט"], h: "תרנגול ב-ת'"},
+            {q: "אני ____וניה גדולה", a: "א", opts: ["א", "ע"], h: "אונייה ב-א'"}
         ]
     };
 
-    let pool = [], idx = 0, errs = [];
+    let activePool = [], curIdx = 0, errors = [];
 
-    function showMap() {
-        document.getElementById('s1').classList.add('hidden');
-        document.getElementById('s2').classList.remove('hidden');
-        document.getElementById('msg').innerText = "בחרו נושא:";
+    function goToTopics() {
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+        document.getElementById('bot-msg').innerText = "בחרו נושא לתרגול:";
     }
 
-    function start(z) { prep(z); }
-
-    function prep(z) {
-        pool = [...bank[z]].sort(() => Math.random() - 0.5);
-        document.getElementById('s1').classList.add('hidden');
-        document.getElementById('s2').classList.add('hidden');
-        document.getElementById('s3').classList.remove('hidden');
-        document.getElementById('msg').innerText = "כמות תרגילים:";
+    function startByDiag() {
+        let txt = document.getElementById('diag-box').value;
+        if(!txt) return;
+        let t = 'phonetic';
+        if(txt.includes('אלך') || txt.includes('כ')) t = 'roots';
+        if(txt.includes('טי')) t = 'templates';
+        pickTopic(t);
     }
 
-    function play(n) {
-        pool = pool.slice(0, n);
-        document.getElementById('s3').classList.add('hidden');
-        document.getElementById('s4').classList.remove('hidden');
-        document.getElementById('exit').classList.remove('hidden');
-        draw();
+    function pickTopic(t) {
+        activePool = [...bank[t]].sort(() => Math.random() - 0.5);
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step3').classList.remove('hidden');
+        document.getElementById('bot-msg').innerText = "כמעט מוכנים...";
     }
 
-    function draw() {
-        if(idx >= pool.length) return end();
-        const d = pool[idx];
-        document.getElementById('q-text').innerHTML = d.q.replace("____", "<span>?</span>");
-        document.getElementById('options').innerHTML = "";
-        d.o.forEach(opt => {
-            const b = document.createElement('button');
-            b.className = "btn"; b.style.background = "white"; b.style.color = "#6366f1"; b.style.border = "2px solid #6366f1";
-            b.innerText = opt;
-            b.onclick = () => {
-                if(opt === d.a) {
-                    document.getElementById('q-text').innerHTML = d.q.replace("____", `<span class="correct">${opt}</span>`);
-                    document.getElementById('msg').innerText = "נכון!";
-                    setTimeout(() => { idx++; draw(); }, 1000);
-                } else {
-                    document.getElementById('q-text').innerHTML = d.q.replace("____", `<span class="wrong">${opt}</span>`);
-                    document.getElementById('msg').innerText = d.h;
-                    errs.push(`משפט: ${d.q} | טעות: ${opt}`);
-                    setTimeout(() => { document.getElementById('q-text').innerHTML = d.q.replace("____", "<span>?</span>"); }, 1500);
-                }
-            };
-            document.getElementById('options').appendChild(b);
+    function setLength(n) {
+        activePool = activePool.slice(0, n);
+        document.getElementById('step3').classList.add('hidden');
+        document.getElementById('step4').classList.remove('hidden');
+        document.getElementById('x-btn').classList.remove('hidden');
+        renderQ();
+    }
+
+    function renderQ() {
+        if(curIdx >= activePool.length) return showResults();
+        let item = activePool[curIdx];
+        document.getElementById('bot-msg').innerText = "איזו מילה מתאימה?";
+        document.getElementById('q-text').innerHTML = item.q.replace("____", "____");
+        
+        let optArea = document.getElementById('options-area');
+        optArea.innerHTML = "";
+        item.opts.forEach(o => {
+            let b = document.createElement('button');
+            b.className = "btn";
+            b.style.background = "white"; b.style.color = "#6366F1"; b.style.border = "2px solid #6366F1";
+            b.innerText = o;
+            b.onclick = () => check(o, item);
+            optArea.appendChild(b);
         });
     }
 
-    function end() {
-        document.getElementById('s4').classList.add('hidden');
-        document.getElementById('s5').classList.remove('hidden');
-        document.getElementById('msg').innerText = "סיימנו!";
-        document.getElementById('rep').innerHTML = errs.length ? errs.join("<br>") : "אין טעויות!";
+    function check(userAns, item) {
+        if(userAns === item.a) {
+            document.getElementById('q-text').innerHTML = item.q.replace("____", `<span class="correct">${userAns}</span>`);
+            document.getElementById('bot-msg').innerText = "מעולה! נכון מאוד.";
+            setTimeout(() => { curIdx++; renderQ(); }, 1200);
+        } else {
+            document.getElementById('q-text').innerHTML = item.q.replace("____", `<span class="wrong">${userAns}</span>`);
+            document.getElementById('bot-msg').innerText = item.h;
+            errors.push(`המשפט: ${item.q.replace('____','___')} | הילד בחר: ${userAns} | נכון: ${item.a}`);
+        }
+    }
+
+    function showResults() {
+        document.getElementById('step4').classList.add('hidden');
+        document.getElementById('step5').classList.remove('hidden');
+        document.getElementById('bot-msg').innerText = "איזה יופי, סיימנו!";
+        document.getElementById('log').innerHTML = errors.length ? errors.join("<br><br>") : "מושלם! אפס טעויות. אתם אלופים!";
     }
 </script>
+
 </body>
 </html>
