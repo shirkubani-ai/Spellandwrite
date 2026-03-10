@@ -3,87 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>בובי - למידה שקטה</title>
+    <title>בובי - גרסה יציבה</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6366f1; --success: #22c55e; --error: #ef4444; --bg: #f8fafc; }
+        :root { --primary: #6366f1; --success: #22c55e; --error: #ef4444; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Assistant', sans-serif; background: #eef2ff; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; overflow: hidden; }
         
         .app-container { background: white; width: 100%; height: 100%; max-width: 500px; display: flex; flex-direction: column; padding: 20px; text-align: center; position: relative; }
         @media (min-width: 500px) { .app-container { height: 95vh; border-radius: 40px; border: 8px solid #fff; box-shadow: 0 20px 50px rgba(0,0,0,0.1); } }
 
-        .exit-btn { position: absolute; top: 15px; left: 15px; background: #fee2e2; color: #ef4444; border: 2px solid #ef4444; border-radius: 50%; width: 35px; height: 35px; font-weight: bold; cursor: pointer; z-index: 100; display: none; align-items: center; justify-content: center; }
+        .exit-btn { position: absolute; top: 15px; left: 15px; background: #fee2e2; color: #ef4444; border: 2px solid #ef4444; border-radius: 50%; width: 35px; height: 35px; font-weight: bold; cursor: pointer; z-index: 100; display: none; align-items: center; justify-content: center; text-decoration: none; }
 
         .bot-icon { width: 80px; height: 80px; margin: 0 auto 10px; background: #e0e7ff; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 3px solid var(--primary); }
         .bubble { background: var(--primary); color: white; border-radius: 20px; padding: 12px; margin-bottom: 15px; font-weight: 700; font-size: 1.1rem; min-height: 70px; display: flex; align-items: center; justify-content: center; position: relative; }
 
-        .sentence { font-size: 1.8rem; font-weight: 800; margin: 25px 0; color: #1e293b; min-height: 3rem; }
-        .gap { color: var(--primary); border-bottom: 4px dashed var(--primary); padding: 0 8px; transition: 0.2s; }
+        .sentence { font-size: 1.8rem; font-weight: 800; margin: 25px 0; color: #1e293b; min-height: 3.5rem; }
+        .gap { color: var(--primary); border-bottom: 4px dashed var(--primary); padding: 0 8px; }
         
-        .correct-ans { color: white !important; background-color: var(--success) !important; border-radius: 10px; padding: 2px 10px; }
-        .wrong-ans { color: white !important; background-color: var(--error) !important; border-radius: 10px; padding: 2px 10px; }
+        .correct-ans { color: white !important; background-color: var(--success) !important; border-radius: 10px; padding: 2px 10px; border: none; }
+        .wrong-ans { color: white !important; background-color: var(--error) !important; border-radius: 10px; padding: 2px 10px; border: none; }
 
-        .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 20px; font-size: 1.2rem; font-weight: 800; cursor: pointer; box-shadow: 0 5px 0 #4338ca; width: 100%; margin-bottom: 12px; }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 20px; font-size: 1.2rem; font-weight: 800; cursor: pointer; box-shadow: 0 5px 0 #4338ca; width: 100%; margin-bottom: 12px; outline: none; }
         .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #4338ca; }
-        .btn-skip { background: #94a3b8; box-shadow: 0 5px 0 #64748b; margin-top: 5px; }
+        .btn-skip { background: #94a3b8; box-shadow: 0 5px 0 #64748b; }
         
-        .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .opt-btn { background: white; color: var(--primary); border: 2px solid #e2e8f0; box-shadow: 0 5px 0 #cbd5e1; }
 
         .progress-bar { width: 100%; height: 8px; background: #e2e8f0; border-radius: 10px; margin-bottom: 15px; display: none; }
         .progress-fill { height: 100%; background: var(--success); width: 0%; transition: 0.3s; }
 
         .report-card { text-align: right; background: #f8fafc; padding: 15px; border-radius: 15px; border: 1px solid #e2e8f0; margin-top: 10px; max-height: 200px; overflow-y: auto; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
     </style>
 </head>
 <body>
 
 <div class="app-container" id="main-box">
-    <button class="exit-btn" id="btn-exit" onclick="location.reload()">X</button>
+    <div id="btn-exit" class="exit-btn" onclick="location.reload()">X</div>
     <div class="progress-bar" id="p-bar"><div class="progress-fill" id="p-fill"></div></div>
     
     <div class="header">
         <div class="bot-icon">
             <svg viewBox="0 0 24 24" width="50" height="50" fill="none" stroke="#6366f1" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path></svg>
         </div>
-        <div class="bubble" id="speech">שלום! אני בובי. בואו נתחיל להתאמן.</div>
+        <div class="bubble" id="speech">שלום! אני בובי. בואו נתחיל להתאמן יחד.</div>
     </div>
 
-    <div class="content-area">
-        <div id="screen-diag">
-            <textarea id="diag-input" style="width:100%; height:80px; border-radius:15px; border:2px solid var(--primary); padding:10px; font-family:inherit;" placeholder="הקלידו משפט לאבחון..."></textarea>
-            <button class="btn" onclick="runAnalysis()" style="margin-top:10px">בצע אבחון 🔍</button>
-            <button class="btn btn-skip" onclick="showMap()">דלג על אבחון - בחר אימון ➔</button>
-        </div>
+    <div id="screen-diag">
+        <textarea id="diag-input" style="width:100%; height:80px; border-radius:15px; border:2px solid var(--primary); padding:10px; font-family:inherit;" placeholder="הקלידו משפט לאבחון..."></textarea>
+        <button class="btn" onclick="runAnalysis()" style="margin-top:10px">בצע אבחון 🔍</button>
+        <button class="btn btn-skip" onclick="showMap()">דלג על אבחון ➔</button>
+    </div>
 
-        <div id="screen-map" class="hidden">
-            <h3 style="margin-top:0">איזה אימון נתחיל היום?</h3>
-            <button class="btn" style="background:#16a34a; box-shadow:0 5px 0 #15803d" onclick="setZone('roots')">🌲 יער השורשים</button>
-            <button class="btn" style="background:#2563eb; box-shadow:0 5px 0 #1e40af" onclick="setZone('templates')">🏭 מפעל התבניות</button>
-            <button class="btn" style="background:#7c3aed; box-shadow:0 5px 0 #5b21b6" onclick="setZone('phonetic')">🦇 מערת הצלילים</button>
-        </div>
+    <div id="screen-map" class="hidden">
+        <button class="btn" style="background:#16a34a; box-shadow:0 5px 0 #15803d" onclick="setZone('roots')">🌲 יער השורשים</button>
+        <button class="btn" style="background:#2563eb; box-shadow:0 5px 0 #1e40af" onclick="setZone('templates')">🏭 מפעל התבניות</button>
+        <button class="btn" style="background:#7c3aed; box-shadow:0 5px 0 #5b21b6" onclick="setZone('phonetic')">🦇 מערת הצלילים</button>
+    </div>
 
-        <div id="screen-amount" class="hidden">
-            <h3>כמה תרגילים תרצו לעשות?</h3>
-            <button class="btn opt-btn" onclick="startPlay(5)">5 תרגילים</button>
-            <button class="btn opt-btn" onclick="startPlay(10)">10 תרגילים</button>
-            <button class="btn opt-btn" onclick="startPlay(50)">הכל! 💪</button>
-        </div>
+    <div id="screen-amount" class="hidden">
+        <button class="btn opt-btn" onclick="startPlay(5)">5 תרגילים</button>
+        <button class="btn opt-btn" onclick="startPlay(10)">10 תרגילים</button>
+        <button class="btn opt-btn" onclick="startPlay(50)">הכל! 💪</button>
+    </div>
 
-        <div id="screen-game" class="hidden">
-            <div class="sentence" id="q-text"></div>
-            <div class="opt-grid" id="opt-grid"></div>
-        </div>
+    <div id="screen-game" class="hidden">
+        <div class="sentence" id="q-text"></div>
+        <div class="opt-grid" id="opt-grid"></div>
+    </div>
 
-        <div id="screen-report" class="hidden">
-            <h2 id="final-title">כל הכבוד!</h2>
-            <button class="btn btn-skip" onclick="toggleReport()">הצג דוח להורים 📋</button>
-            <div id="parent-report" class="report-card hidden"></div>
-            <button class="btn" style="background:var(--success); margin-top:15px;" onclick="location.reload()">אימון חדש</button>
-        </div>
+    <div id="screen-report" class="hidden">
+        <h2>כל הכבוד!</h2>
+        <button class="btn btn-skip" onclick="toggleReport()">דוח להורים 📋</button>
+        <div id="parent-report" class="report-card hidden"></div>
+        <button class="btn" style="background:var(--success); margin-top:15px;" onclick="location.reload()">אימון חדש</button>
     </div>
 </div>
 
@@ -92,13 +88,16 @@
         roots: [
             { q: "אבא ____ לעבודה", opts: ["הלך", "אלך"], ans: "הלך", hint: "משפחת הליכה מתחילה ב-ה'" },
             { q: "הילד ____ סיפור", opts: ["כותב", "קוטב"], ans: "כותב", hint: "כתיבה היא באות כ'" },
-            { q: "שלחתי ____ לסבתא", opts: ["מכתב", "מקתב"], ans: "מכתב", hint: "מכתב הוא ב-כ'" }
+            { q: "שלחתי ____ לסבתא", opts: ["מכתב", "מקתב"], ans: "מכתב", hint: "מכתב הוא ב-כ'" },
+            { q: "אנחנו ____ ביומן", opts: ["כותבים", "קוטבים"], ans: "כותבים", hint: "כותבים מתחיל ב-כ'" }
         ],
         templates: [
-            { q: "אתמול אכל____ תפוח", opts: ["תי", "טי"], ans: "תי", hint: "כשמדברים על עצמי בעבר - זה תי" }
+            { q: "אתמול אכל____ תפוח", opts: ["תי", "טי"], ans: "תי", hint: "כשמדברים עלי בעבר - זה תי" },
+            { q: "שיחק____ בחצר", opts: ["תי", "טי"], ans: "תי", hint: "שיחקתי נגמר ב-תי" }
         ],
         phonetic: [
-            { q: "אני __והב שוקולד", opts: ["א", "ע"], ans: "א", hint: "אוהב מתחיל ב-א'" }
+            { q: "אני __והב שוקולד", opts: ["א", "ע"], ans: "א", hint: "אוהב מתחיל ב-א'" },
+            { q: "ה__לפון מצלצל", opts: ["ט", "ת"], ans: "ט", hint: "טלפון ב-ט'" }
         ]
     };
 
@@ -106,7 +105,6 @@
     let currentIdx = 0;
     let errors = [];
 
-    // פונקציית עדכון טקסט ללא דיבור
     function updateSpeech(t) {
         document.getElementById('speech').innerText = t;
     }
@@ -117,14 +115,13 @@
         let z = 'phonetic';
         if(val.includes('אלכ') || val.includes('אלך')) z = 'roots';
         if(val.includes('טי')) z = 'templates';
-        updateSpeech("האבחון הושלם! בואו נבחר כמות תרגילים.");
         setZone(z);
     }
 
     function showMap() {
         document.getElementById('screen-diag').classList.add('hidden');
         document.getElementById('screen-map').classList.remove('hidden');
-        updateSpeech("איזה נושא נתרגל היום?");
+        updateSpeech("בחרו נושא לתרגול:");
     }
 
     function setZone(key) {
@@ -150,25 +147,24 @@
         const data = selectedPool[currentIdx];
         document.getElementById('p-fill').style.width = `${(currentIdx / selectedPool.length) * 100}%`;
         document.getElementById('q-text').innerHTML = data.q.replace("____", `<span class="gap">?</span>`);
-        updateSpeech("בחרו את התשובה הנכונה.");
+        updateSpeech("מה המילה הנכונה?");
         
         const grid = document.getElementById('opt-grid');
         grid.innerHTML = '';
         data.opts.forEach(o => {
             const b = document.createElement('button');
-            b.className = 'btn opt-btn'; b.innerText = o;
+            b.className = 'btn opt-btn';
+            b.innerText = o;
             b.onclick = () => {
                 if(o === data.ans) {
                     document.getElementById('q-text').innerHTML = data.q.replace("____", `<span class="gap correct-ans">${o}</span>`);
-                    updateSpeech("כל הכבוד! תשובה נכונה.");
+                    updateSpeech("מצוין! נכון מאוד.");
                     setTimeout(() => { currentIdx++; loadQ(); }, 1200);
                 } else {
                     document.getElementById('q-text').innerHTML = data.q.replace("____", `<span class="gap wrong-ans">${o}</span>`);
                     updateSpeech(data.hint);
                     errors.push({q: data.q, wrong: o, right: data.ans});
-                    document.getElementById('main-box').style.animation = "shake 0.4s";
                     setTimeout(() => { 
-                        document.getElementById('main-box').style.animation = "";
                         document.getElementById('q-text').innerHTML = data.q.replace("____", `<span class="gap">?</span>`);
                     }, 1800);
                 }
@@ -178,17 +174,15 @@
     }
 
     function showEnd() {
-        document.getElementById('p-fill').style.width = '100%';
         document.getElementById('screen-game').classList.add('hidden');
         document.getElementById('screen-report').classList.remove('hidden');
-        updateSpeech("סיימנו את האימון!");
-        
+        updateSpeech("סיימנו! כל הכבוד.");
         let reportDiv = document.getElementById('parent-report');
-        if(errors.length === 0) reportDiv.innerHTML = "<b>מושלם! לא היו טעויות.</b>";
+        if(errors.length === 0) reportDiv.innerHTML = "מושלם! לא היו טעויות.";
         else {
-            reportDiv.innerHTML = "<b>סיכום טעויות:</b><br>";
+            reportDiv.innerHTML = "<b>טעויות לחיזוק:</b><br>";
             errors.forEach(e => {
-                reportDiv.innerHTML += `• המילה: ${e.right} (הבחירה: ${e.wrong})<br>`;
+                reportDiv.innerHTML += `• המילה: ${e.right} (בחר: ${e.wrong})<br>`;
             });
         }
     }
